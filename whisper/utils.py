@@ -158,39 +158,25 @@ class SubtitlesWriter(ResultWriter):
                         segment["words"][chunk_index : chunk_index + words_count]
                     ):
                         timing = original_timing.copy()
-                        word = timing["word"]
                         long_pause = (
                             not preserve_segments and timing["start"] - last > 3.0
                         )
-                        has_room = line_len + len(word) <= max_line_width
+                        has_room = line_len + len(timing["word"]) <= max_line_width
                         seg_break = i == 0 and len(subtitle) > 0 and preserve_segments
                         if not first_line_added:
                             timing["start"] = 0.0  # Set start time to 0 for the first line
                             first_line_added = True
-
-                        # Check if the word contains punctuation at the end
-                        if word[-1] in [',', '.', '!', '?']:
-                            word_has_punctuation = True
-                        else:
-                            word_has_punctuation = False
-
-                        # Check if subtitle length is at least 50% from max_line_width
-                        if line_len >= 0.2 * max_line_width:
-                            subtitle_length_sufficient = True
-                        else:
-                            subtitle_length_sufficient = False
-
                         if (
                             line_len > 0
-                            and (has_room or (word_has_punctuation and subtitle_length_sufficient))
+                            and has_room
                             and not long_pause
                             and not seg_break
                         ):
                             # line continuation
-                            line_len += len(word)
+                            line_len += len(timing["word"])
                         else:
                             # new line
-                            word = word.strip()
+                            timing["word"] = timing["word"].strip()
                             if (
                                 len(subtitle) > 0
                                 and max_line_count is not None
@@ -204,10 +190,9 @@ class SubtitlesWriter(ResultWriter):
                             elif line_len > 0:
                                 # line break
                                 line_count += 1
-                                word = "\n" + word
+                                timing["word"] = "\n" + timing["word"]
 
-                            line_len = len(word.strip())
-                        timing["word"] = word
+                            line_len = len(timing["word"].strip())
                         subtitle.append(timing)
                         last = timing["start"]
                     chunk_index += max_words_per_line
@@ -252,6 +237,7 @@ class SubtitlesWriter(ResultWriter):
             always_include_hours=self.always_include_hours,
             decimal_marker=self.decimal_marker,
         )
+
 
 class WriteVTT(SubtitlesWriter):
     extension: str = "vtt"
