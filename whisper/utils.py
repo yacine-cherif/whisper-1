@@ -235,7 +235,7 @@ class SubtitlesWriter(ResultWriter):
 
 class WriteVTT(SubtitlesWriter):
     extension: str = "vtt"
-    always_include_hours: bool = False
+    always_include_hours: bool = True
     decimal_marker: str = "."
 
     def write_result(
