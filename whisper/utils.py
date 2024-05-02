@@ -145,6 +145,8 @@ class SubtitlesWriter(ResultWriter):
             # the next subtitle to yield (a list of word timings with whitespace)
             subtitle: List[dict] = []
             last: float = get_start(result["segments"]) or 0.0
+            first_line_added = False
+
             for segment in result["segments"]:
                 chunk_index = 0
                 words_count = max_words_per_line
@@ -161,6 +163,9 @@ class SubtitlesWriter(ResultWriter):
                         )
                         has_room = line_len + len(timing["word"]) <= max_line_width
                         seg_break = i == 0 and len(subtitle) > 0 and preserve_segments
+                         if not first_line_added:
+                            timing["start"] = 0.0  # Set start time to 0 for the first line
+                            first_line_added = True
                         if (
                             line_len > 0
                             and has_room
@@ -186,6 +191,7 @@ class SubtitlesWriter(ResultWriter):
                                 # line break
                                 line_count += 1
                                 timing["word"] = "\n" + timing["word"]
+
                             line_len = len(timing["word"].strip())
                         subtitle.append(timing)
                         last = timing["start"]
