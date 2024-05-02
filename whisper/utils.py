@@ -175,7 +175,7 @@ class SubtitlesWriter(ResultWriter):
                             word_has_punctuation = False
 
                         # Check if subtitle length is at least 50% from max_line_width
-                        if line_len >= 0.5 * max_line_width:
+                        if line_len >= 0.2 * max_line_width:
                             subtitle_length_sufficient = True
                         else:
                             subtitle_length_sufficient = False
