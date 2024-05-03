@@ -4,6 +4,8 @@ import re
 import sys
 import zlib
 from typing import Callable, List, Optional, TextIO
+from io import StringIO
+
 
 system_encoding = sys.getdefaultencoding()
 
@@ -247,10 +249,18 @@ class WriteVTT(SubtitlesWriter):
     def write_result(
         self, result: dict, file: TextIO, options: Optional[dict] = None, **kwargs
     ):
+        vtt_string = StringIO()  # Create a StringIO object to store the VTT content
+        vtt_string.write("WEBVTT\n\n") 
+        for start, end, text in self.iterate_result(result, options, **kwargs):
+          vtt_string.write(f"{start} --> {end}\n{text}\n\n")
+
         print("WEBVTT\n", file=file)
         for start, end, text in self.iterate_result(result, options, **kwargs):
             print(f"{start} --> {end}\n{text}\n", file=file, flush=True)
-
+        
+        vtt_content = vtt_string.getvalue()
+        vtt_string.close()  # Close the StringIO object
+        return vtt_content
 
 class WriteSRT(SubtitlesWriter):
     extension: str = "srt"
